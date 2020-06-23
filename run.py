@@ -85,9 +85,8 @@ def userInput(options):
 
             
 
-
-
-main()
+if __name__ == '__main__':
+    main()
 
 
 
