@@ -8,7 +8,6 @@ import minitools
 import aozoratext
 import subprocess 
 import json
-import timer
 import config
 
 if config.db_type is 'sql':
@@ -32,7 +31,6 @@ class Searchers:
     img_searcher = providers.Singleton(websearcher.LofterImageSearcher, se)
     img_downloader = providers.Singleton(websearcher.LofterImageDownloader, se)
     novimg_downloader = providers.Singleton(websearcher.LofterNovImageDownloader, se)
-    timeit = providers.Callable(timer.timeit)
     url_img_downloader = providers.Singleton(websearcher.ImageDownloader,se)
     
      
@@ -81,6 +79,7 @@ class DB:
 
 class Tools:
     cls = minitools.cls
+    fixWinPrint = minitools.fixWinPrint
     pwd = os.getcwd
     apwd = providers.Callable(os.path.abspath, '.')
     abspath = os.path.abspath
