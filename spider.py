@@ -785,7 +785,10 @@ class LazyTagSpider:
     def getLastestPublishTimeInDb(self):
 
         latest = myproviders.DB.getLastestPost(self.tagName)
-        latest = latest[0]['publishTime']
+        if latest:
+            latest = latest[0]['publishTime']
+        else:
+            latest = 0
         return latest
 
 
