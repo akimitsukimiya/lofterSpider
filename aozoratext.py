@@ -43,7 +43,8 @@ class Patterns:
         #'img' : (r'［＃画像（\2）入る］'),
         'img' : (r'\n［＃枠囲み］\2［＃枠囲み終わり］ 查看图片 ［＃破線枠囲み］'),
         'br' : (r'\n'),
-        'bold' : (r'［＃ここから太字］\1［＃ここで太字終わり］'),
+        'bold' : (r'［＃太字］\1［＃太字終わり］'),
+        'bold_p' : (r'［＃ここから太字］\1［＃ここで太字終わり］'),
         #'link' : (r'［＃枠囲み］\2［＃枠囲み終わり］\1［＃破線枠囲み］'),
         'link' : (r'［＃枠囲み］\2［＃枠囲み終わり］\1［＃破線枠囲み］'),
         #'link' : (r'<a href = "\2">\1<\a>'),
@@ -137,7 +138,6 @@ def htmlToAozora(html, images, root):
     simple = trivial + rare + trivial
     for pname in html_patterns:
         html = html_patterns[pname]
-        aozora = aozora_patterns[pname]
         tags = soup.findAll(html[0], html[1])
 
         #if pname is 'img':
@@ -146,6 +146,8 @@ def htmlToAozora(html, images, root):
 
 
         for tag in tags:
+
+            aozora = aozora_patterns[pname]
 
             # special case 1
             #if tag.findAll('img'):
@@ -161,6 +163,9 @@ def htmlToAozora(html, images, root):
             # special case 2
             if pname is 'link':
                 txt = txt.replace('\n', '  ')
+            # special case 1
+            if pname is 'bold' and '\n' in txt:
+                aozora = aozora_patterns['bold_p']
 
 
             ultra = html[2] and tag[html[2]]
