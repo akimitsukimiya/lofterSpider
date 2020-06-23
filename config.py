@@ -28,6 +28,9 @@ image_blog_limit = 10
 # rather, put their images in one large folder named
 other_img_dir = '其他'
 
+# Do you want to delete the raw txt files with aozora chuki
+# after converting them to epub ?
+del_raw_after_converting_aozora = False
 
 ######## SEARCHER BEHAVIOR ##########
 

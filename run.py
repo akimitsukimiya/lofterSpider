@@ -10,8 +10,9 @@ def main():
     options = (u'> 1. 将指定tag归档备份到本地数据库',
          u'> 2. 更新指定tag的本地数据库',
          u'> 3. 将数据库中的图片型博文筛选后导出',
-         u'> 4. 将数据库中的文档型博文筛选后导出')
-    options = dict(zip(('1','2','3','4'), options))
+         u'> 4. 将数据库中的文档型博文筛选后导出',
+         u'> 5. 将数据库中的文档型博文筛选后制作成epub电子书')
+    options = dict(zip(('1','2','3','4','5'), options))
     print('\n'.join(options.values()))
     print(u'>> 备注: 请在config.py中修改配置信息.')
     
@@ -27,8 +28,13 @@ def main():
             spider.baseTagArchive(rebase_level = spiders.DO_UPDATE)
         elif option is '3':
             spider.packPostsPlain(ptype = spiders.IMAGE)
-        else:
+        elif option is '4':
             spider.packPostsPlain(ptype = spiders.TEXT)
+        elif option is '5':
+            spider.makeAozora()
+            spider = spiders.EagerTagSpider(tagName)
+            spider.aozoraEpub3(delRaw = \
+                               config.del_raw_after_converting_aozora)
 
         go_on = input(u'\n>> 是否继续使用? y-是 (others)-否 ')
         if go_on in ('y','Y'):
