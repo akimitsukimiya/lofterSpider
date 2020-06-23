@@ -22,6 +22,7 @@ nov_dir_name = '文章'
 
 # The name for folder within which image posts should be stored
 image_dir_name = '图片'
+
 # When packing images, don't make author folder for auhors who post less than:
 image_blog_limit = 10
 # rather, put their images in one large folder named
@@ -31,30 +32,33 @@ other_img_dir = '其他'
 ######## SEARCHER BEHAVIOR ##########
 
 # How many records the searcher prefer to fetch on every query
-#when searching tag
+# when searching tag
 tag_search_limit = 500
-#when searching blog
+# when searching blog
 blog_search_limit = 200
 comment_search_limit = 50
 
 ######## DB INFO ####################
 
+# What db type do you use (now sql only!!)
 db_type = 'sql'
-# How db you want to call your db
+
+# How do you want to call your db
 db_name = 'friend'
+
 # Your db name can be appended after a prefix
 db_prefix = 'lofter_'
 
 
 ####### USER PREFERENCE ############
 
-# The blacklist authors you always want to block
+# The hated authors you always want to block
 blackusers = [] # eg: ['blogNickName1', 'blogNickName2']
 
-# The blacklist tags you always want to block
+# The hated tags you always want to block
 blacktags = []
 
-# The blacklist keywords you don't want to see in anyone's post title
+# The hated words you don't want to see in anyone's post title
 blackwords = []
 
 #blacktags = ['黄喻','叶喻','叶黄','all黄','all喻','喻all']
