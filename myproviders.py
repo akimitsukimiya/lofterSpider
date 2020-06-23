@@ -79,6 +79,7 @@ class DB:
 
 class Tools:
     cls = minitools.cls
+    fixWinPrint = minitools.fixWinPrint
     pwd = os.getcwd
     apwd = providers.Callable(os.path.abspath, '.')
     abspath = os.path.abspath
