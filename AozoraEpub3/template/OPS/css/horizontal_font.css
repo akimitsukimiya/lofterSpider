@@ -1,7 +1,0 @@
-@charset "utf-8";
-@namespace "http://www.w3.org/1999/xhtml";
-
-/** 横書きフォント */
-body {
-font-family: "STZhongsong", "FZShuTi", "STXinwei", "STCaiyun", "NSimSun", serif, sans-serif;
-}
