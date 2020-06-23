@@ -281,6 +281,7 @@ def htmlToPlain(html):
             
             txt = tag.text
             extra = html[2] and tag[html[2]]
+            extra = re.sub(r'(https?://[^\?]*)\?.*', r'\1', extra)
 
             if extra and not isImage(extra):
                 urls_count += 1
@@ -338,7 +339,7 @@ def makePlainRef(urls, images):
 
 def makePlainFname(blog, post):
     fname = (post['title'] or '') + \
-            ' By:' + blog['blogNickName'] +\
+            ' By ' + blog['blogNickName'] +\
             ' ' + datetime.fromtimestamp(post['publishTime']/1000).strftime('%Y-%m-%d')
     fname = fname.replace('/', '_')
     return fname

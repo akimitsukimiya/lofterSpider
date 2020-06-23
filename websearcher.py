@@ -299,6 +299,7 @@ class LofterWebTagSearcher(Searcher):
             self.__fetched__ = 0
             with open('error.log', 'a+') as f:
                 f.write(rst.text)
+                f.close()
             resp_list =  []
         time.sleep(1)
         return resp_list
@@ -812,6 +813,7 @@ class LofterImageDownloader(Searcher):
         path = self.root + '/' + self.fname or re.sub(r'http.*/([^/]*)', r'\1', url)
         with open(path, 'wb') as f:
             f.write(rst)
+            f.close()
         return path
 
 

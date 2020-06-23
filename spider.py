@@ -631,7 +631,7 @@ class EagerTagSpider:
             if len(txt) / 1024 / 1024 >= 1:
                 # TODO add time to filename
                 fname = root + '/' + tagName + str(count) + '_raw.txt'
-                with open(fname, 'w') as f:
+                with open(fname, 'w', encoding = 'utf-8') as f:
                     f.write(txt)
                 count += 1
                 txt = txt0 % (tagName, count, appName)
@@ -640,7 +640,7 @@ class EagerTagSpider:
         if len(txt) < 50:
             return None
         fname = root + '/' + tagName + str(count) + '_raw.txt'
-        with open(fname, 'w') as f:
+        with open(fname, 'w', encoding = 'utf-8') as f:
             f.write(txt)
 
 
@@ -1147,7 +1147,7 @@ class LazyTagSpider:
             if len(txt) / 1024 / 1024 >= 1:
                 # TODO add time to filename
                 fname = root + '/' + tagName + str(count) + '_raw.txt'
-                with open(fname, 'w') as f:
+                with open(fname, 'w', encoding = 'utf-8') as f:
                     f.write(txt)
                 count += 1
                 txt = txt0 % (tagName, count, appName)
@@ -1156,7 +1156,7 @@ class LazyTagSpider:
         if len(txt) < 50:
             return None
         fname = root + '/' + tagName + str(count) + '_raw.txt'
-        with open(fname, 'w') as f:
+        with open(fname, 'w', encoding = 'utf-8') as f:
             f.write(txt)
 
 
@@ -1239,13 +1239,14 @@ class LazyTagSpider:
                 links and ptype is TEXT and links_f.write(links)
 
                 try:
-                    with open(author_dir + '/' + fname + '.txt', 'w') as f:
+                    with open(author_dir + '/' + fname + '.txt', 'w', encoding = 'utf-8') as f:
                         f.write(body)
+                        f.close()
                 except Exception as e:
                     print('ERROR writing file:', e)
 
 
-        ptype is TEST and links_f.close()
+        ptype is TEXT and links_f.close()
                 
 
 

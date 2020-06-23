@@ -1,4 +1,6 @@
 .env/
+lofter*.db
+archive/
 dist/
 build/
 .DS_Store/

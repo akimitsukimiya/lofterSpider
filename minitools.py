@@ -139,7 +139,7 @@ def stripiImageUrl(url):
 
 
 def fixFname(fname):
-    resp = r'^[\.]+|[\.]+$|[\\\/]+|[\t\n]+'
+    resp = r'^[\.]+|[\.]+$|[\\\/\:\|\<\>\*\?\"]+|[\t\n]+'
     fname = re.sub(resp, r'_', fname)
     return fname
 
