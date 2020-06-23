@@ -29,24 +29,26 @@ class Patterns:
     #rare = '⦑%s⦀%s⦀%s⦒
 
     html_patterns = {
+        'img' : ('img',{'src':True},'src'),
         'br' : ('br',{},''),
         'bold' : ('strong', {}, ''),
         'link' : ('a',{'href':True},'href'),
         'underline': ('span', {'type':'text-decoration:underline;'}, ''),
         'through' : ('span', {'type':'text-decoration:through;'}, ''),
-        'img' : ('img',{'src':True},'src'),
         'quote': ('blockquote',{}, ''),
         'p' : ('p',{},'')
     }
 
     aozora_patterns = {
+        #'img' : (r'［＃画像（\2）入る］'),
+        'img' : (r'\n［＃枠囲み］\2［＃枠囲み終わり］ 查看图片 ［＃破線枠囲み］'),
         'br' : (r'\n'),
         'bold' : (r'［＃ここから太字］\1［＃ここで太字終わり］'),
         #'link' : (r'［＃枠囲み］\2［＃枠囲み終わり］\1［＃破線枠囲み］'),
         'link' : (r'［＃枠囲み］\2［＃枠囲み終わり］\1［＃破線枠囲み］'),
+        #'link' : (r'<a href = "\2">\1<\a>'),
         'underline' : (r'［＃「\1」に傍線］'),
         'through' : (r'［＃取消線］\1［＃取消線終わり］'),
-        'img' : (r'［＃画像（\2）入る］'),
         'quote' : (r'［＃ここから２字下げ］\n［＃ここから１段階小さな文字］' + \
                    r'\1［＃ここで小さな文字終わり］\n［＃ここで字下げ終わり］'),
         'p' : (r'\1\n')
@@ -93,7 +95,7 @@ def escapeTitle(text):
         text = text or text0
     return text
 
-
+# NOTE  deprecated !
 #Change images url:
 def fixImageUrl(tags, images, root, embed = False):
     if embed and len(images) == len(tags):
@@ -138,21 +140,21 @@ def htmlToAozora(html, images, root):
         aozora = aozora_patterns[pname]
         tags = soup.findAll(html[0], html[1])
 
-        if pname == 'img':
-            fixImageUrl(tags, images, root)
-            continue
+        #if pname is 'img':
+        #    fixImageUrl(tags, images, root)
+        #    continue
 
 
         for tag in tags:
 
             # special case 1
-            if tag.findAll('img'):
-                contents = reversed(tag.contents)
-                [tag.insert_after(c) for c in contents]
-                tag.unwrap()
-                print('WARNING: ignoring %s tag, \
-                      for it contains images.' % pname)
-                continue
+            #if tag.findAll('img'):
+            #    contents = reversed(tag.contents)
+            #    [tag.insert_after(c) for c in contents]
+            #    tag.unwrap()
+            #    print('WARNING: ignoring %s tag, \
+            #          for it contains images.' % pname)
+            #    continue
 
 
             txt = tag.text
