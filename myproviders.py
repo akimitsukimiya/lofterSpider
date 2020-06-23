@@ -83,7 +83,6 @@ class Tools:
     pwd = os.getcwd
     apwd = providers.Callable(os.path.abspath, '.')
     abspath = os.path.abspath
-    pjroot =providers.Object('/Users/akimi/Python/lofter')
 
     mkdir = os.mkdir
     isdir = os.path.exists

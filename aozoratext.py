@@ -41,7 +41,7 @@ class Patterns:
 
     aozora_patterns = {
         'br' : (r'\n'),
-        'bold' : (r'［＃太字］\1［＃太字終わり］'),
+        'bold' : (r'［＃ここから太字］\1［＃ここで太字終わり］'),
         #'link' : (r'［＃枠囲み］\2［＃枠囲み終わり］\1［＃破線枠囲み］'),
         'link' : (r'［＃枠囲み］\2［＃枠囲み終わり］\1［＃破線枠囲み］'),
         'underline' : (r'［＃「\1」に傍線］'),
@@ -117,8 +117,8 @@ def fixImageUrl(tags, images, root, embed = False):
             #a = soup.new_tag('a')
             #a['href'] = src
             #a.string = '查看图片'
-            a = re.sub(r'(查看图片)(.*)', aozorap, \
-                      '查看图片' + src)
+            a = re.sub(r'( 查看图片 )(.*)', aozorap, \
+                      ' 查看图片 ' + src)
             tag.replace_with(a)
         return None
             
@@ -153,6 +153,8 @@ def htmlToAozora(html, images, root):
                 print('WARNING: ignoring %s tag, \
                       for it contains images.' % pname)
                 continue
+
+            # special case 2
 
             txt = tag.text
             ultra = html[2] and tag[html[2]]

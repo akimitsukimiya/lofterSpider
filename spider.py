@@ -64,7 +64,7 @@ class EagerTagSpider:
 
         #image and nov dir's under tag dir
         self.img_dir = self.tag_dir + '/' + config.image_dir_name
-        self.nov_dir = self.tag_dir + '' + config.nov_dir_name
+        self.nov_dir = self.tag_dir + '/' + config.nov_dir_name
         #self.nov_images_dir = self.nov_dir + '/nov_images'
 
         ##Initialize database:
@@ -654,7 +654,7 @@ class EagerTagSpider:
         
         print('Start converting aozora txt to epub ...')
         #convert to epub
-        pjroot = myproviders.Tools.pjroot()
+        pjroot = myproviders.Tools.abspath('.')
 
         #go to aozora convertor dir
         #so root need to be a abs path now:
@@ -676,8 +676,10 @@ class EagerTagSpider:
 
 
     def makeMobi(self):
-        root = self.nov_dir
         tools = myproviders.Tools
+        root = self.nov_dir
+        root = tools.abspath(root)
+        
         if not tools.isdir(root):
             print(root)
             print('No aozora text found !')
@@ -685,17 +687,16 @@ class EagerTagSpider:
         
         print('Start converting eppub to mobi ...')
         #convert to epub
-        pjroot = myproviders.Tools.pjroot()
+        pjroot = tools.abspath('.')
         #go to aozora convertor dir
-        myproviders.Tools.cd(pjroot + '/' + \
-                            'AozoraEpub3')
+        tools.cd(pjroot + '/' + 'AozoraEpub3')
        
         # convert
         for fname in tools.ls(root):
             if fname.endswith('epub'):
                 tools.to_mobi(root + '/' + fname)
         # go back to pjroot
-        myproviders.Tools.cd(pjroot)
+        tools.cd(pjroot)
         print('Mobi ebooks done !' )
            
 
@@ -1132,14 +1133,7 @@ class LazyTagSpider:
 
             #All text posts on a blog
             posts = myproviders.DB.getBlogPosts(blog)
-            posts = [p for p in posts \
-                    if p.type == 1 \
-                    and len(p.content) >= minlen \
-                    and tagName in p.tag \
-                    and self.checkHot(p, minhot) \
-                    and self.excludeBlack(p.title, self.blackwords) \
-                    and self.excludeBlack(p.tag, self.blacktags)]
-                
+            posts = self.filterPosts(posts, ptype = 1)
 
             if len(posts)  == 0:
                 continue
@@ -1289,3 +1283,21 @@ class LazyTagSpider:
 
 
 
+    def orderPosts(self, posts):
+        # TODO add collection infos
+        collections = set([p['collectionId'] for p in posts])
+        s_posts = {i:[p for p in posts if p['collectionId'] == i] \
+                  for i in collections}
+        key = lambda e:e['publishTime']
+        l =[]
+        for col in s_posts:
+            l += sorted(s_posts[col], key = key)
+        return l
+        
+
+
+    def orderBlogs(self, blogs, order_by = 1):
+        # TODO add more cases
+        key = lambda e : len(myproviders.DB.getBlogPosts(e))
+        l = sorted(blogs, key = key, reverse = True)
+        return l
