@@ -154,9 +154,13 @@ def htmlToAozora(html, images, root):
                       for it contains images.' % pname)
                 continue
 
-            # special case 2
 
             txt = tag.text
+            # special case 2
+            if pname is 'link':
+                txt = txt.replace('\n', '  ')
+
+
             ultra = html[2] and tag[html[2]]
             strg = txt + rare + ultra
             strg = re.sub(simple, aozora, strg)
