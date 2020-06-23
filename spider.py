@@ -857,7 +857,6 @@ class LazyTagSpider:
         
         # Initialize a blog searcher
         post_searcher = myproviders.Searchers.blog_searcher()
-        tag = self.getTag()
         if rebase_level in (DO_NOT, DO_UPDATE):
             earliest = self.getLastestPublishTimeInDb() + 1
         else:
@@ -965,7 +964,7 @@ class LazyTagSpider:
             print(info)
         
         if not posts_raw:
-            return blogs
+            return len(blogs),0
 
         #Sync new found posts to db
         print(colors('blue', '>> Syncing %d posts to db...' % len(posts_raw)))
