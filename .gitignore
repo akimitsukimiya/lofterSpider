@@ -1,4 +1,5 @@
 .env/
+*.swp
 lofter*.db
 archive/
 dist/
