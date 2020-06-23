@@ -83,7 +83,6 @@ def userInput(options):
 
 
 if __name__ == '__main__':
-    myproviders.Tools.fixWinPrint()
     main()
 
 

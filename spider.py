@@ -924,7 +924,7 @@ class LazyTagSpider:
 
             yield 'images_raw',image_links
         
-        info =  colors('pink','   %d images found' % len(imgposts_raw))
+        info =  colors('pink','   %d images found' % len(image_links))
         print(info)
 
         info = colors('pink',\
