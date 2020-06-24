@@ -71,3 +71,6 @@ blackwords = []
 # If you run this thing without any runtime configuration
 # how do you want to set the minimum hot you want to export your posts
 minhot = 0
+
+# How large you want to restrict your epub size
+max_epub_size = 3

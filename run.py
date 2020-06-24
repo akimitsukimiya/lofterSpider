@@ -2,6 +2,8 @@ import config
 import spider as spiders
 import myproviders 
 
+
+
 def main():
     myproviders.Tools.cls()
     print(u'>> LOF SPIDER START SPIDERING !!>>>>>>>>>\n',
@@ -18,21 +20,24 @@ def main():
     
     while True:
         tagName, option = userInput(options)
-        spider = spiders.LazyTagSpider(tagName)
 
         if option is '1':
+            spider = spiders.LazyTagSpider(tagName)
             spider.baseTagArchive(rebase_level = spiders.DO)
             if config.do_deepbase:
                 spider.deepBase1()
         elif option is '2':
+            spider = spiders.LazyTagSpider(tagName)
             spider.baseTagArchive(rebase_level = spiders.DO_UPDATE)
         elif option is '3':
+            spider = spiders.DBSpider(tagName)
             spider.packPostsPlain(ptype = spiders.IMAGE)
         elif option is '4':
+            spider = spiders.DBSpider(tagName)
             spider.packPostsPlain(ptype = spiders.TEXT)
         elif option is '5':
+            spider = spiders.DBSpider(tagName)
             spider.makeAozora()
-            spider = spiders.EagerTagSpider(tagName)
             spider.aozoraEpub3(delRaw = \
                                config.del_raw_after_converting_aozora)
 

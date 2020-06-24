@@ -42,9 +42,6 @@ class EagerTagSpider:
         '''
         self.tagName = tagName
         self.minhot = minhot
-        self.blackwords = blackwords
-        self.blacktags = blacktags
-        self.blackusers = blackusers
         self.tag = None
         
         # As this is a eager spider,
@@ -54,18 +51,6 @@ class EagerTagSpider:
         # whenever needed.
         self.posts = None
 
-        # Read the dir info's from global config
-        if not myproviders.Tools.isdir(config.data_export_dir):
-            myproviders.Tools.mkdir(config.data_export_dir)
-        # Seperate tag dir
-        self.tag_dir = config.data_export_dir  + '/'+ tagName
-        if not myproviders.Tools.isdir(self.tag_dir):
-            myproviders.Tools.mkdir(self.tag_dir)
-
-        #image and nov dir's under tag dir
-        self.img_dir = self.tag_dir + '/' + config.image_dir_name
-        self.nov_dir = self.tag_dir + '/' + config.nov_dir_name
-        #self.nov_images_dir = self.nov_dir + '/nov_images'
 
         ##Initialize database:
         myproviders.DB.init()
@@ -490,255 +475,6 @@ class EagerTagSpider:
         # TODO auto zip
 
 
-    ##############
-    ###Exporter###
-    ##############
-
-
-    def dlPackedImages(self, minhot = 0):
-
-        thred = config.image_blog_limit
-        other = config.other_img_dir
-
-        print('Directly packing Images...')
-        tagName = self.tagName
-        #Sync a tag object from db
-        tag = self.getTag()
-
-        minhot = minhot or self.minhot
-        #Get full path of root dir
-        root = self.img_dir
-        root = myproviders.Tools.abspath(root)
-
-
-        #Initialize a downloader
-        image_downloader = myproviders.Searchers.img_downloader()
-
-        #Create root dir if not already exists
-        if not myproviders.Tools.isdir(root):
-            myproviders.Tools.mkdir(root)
-
-
-        #Loop against associated blogs 
-        for blog in myproviders.DB.getTagBlogs(tag):
-
-            if blog['blogNickName'] in self.blackusers:
-                continue
-
-            #Get all image posts under blog
-            posts = myproviders.DB.getBlogPosts(blog)
-            posts = [post for post in posts \
-                    if post.type == 2 \
-                    and tagName in post.tag \
-                    and self.excludeBlack(post.tag, self.blacktags) \
-                    and self.checkHot(post, minhot)\
-                    ]
-
-            #Get distict  dir path, create if not exists
-            user_name = blog.blogNickName
-            p_num = len(posts)
-
-            #Ignore pure text blog
-            if not p_num:
-                continue
-            
-            #Get folder name according to blog nick name
-            user_name = user_name.replace('/','_')
-            if p_num >= thred:
-                dir_path = root + '/' + user_name
-            else:
-                dir_path = root + '/' + others
-            if not myproviders.Tools.isdir(dir_path):
-                myproviders.Tools.mkdir(dir_path)
-
-            #Loop against image posts under blog
-            for post in posts:
-                
-                #Get post time in string
-                dt = myproviders.Tools.dt(post.publishTime)
-                
-                #Get image entries under this post
-                images = post.images
-                if not len(images):
-                    continue
-
-                #Start downloading 
-                for i in range(0, len(images)):
-                    #Do download
-                    old = image_downloader(dir_path, images[i])
-
-                    #Ignore invalid images
-                    if not old:
-                        continue
- 
-                    #Get image extension
-                    ext = myproviders.Tools.extension(old)   
-
-                    #Name the image properly
-                    new = dir_path + '/%s-%s-%03d.%s'  % (user_name, dt, i+1, ext)
-                    try: 
-                        myproviders.Tools.rn(old, new)
-                    except FileNotFoundError as e:
-                        print(e,"\nImages not renamed properly!")
-
-            p_num and print("%d done!" % p_num)
-
-
-    def makeAozora(self, minhot = 0, minlen = 0):
-        appName = config.app_name
-
-        print('Start making Aozora text...')
-        tagName = self.tagName
-        tag = self.getTag() 
-        txt0 = 'Lofter #%s #Archive%0d\n%s\n' 
-        minhot = minhot or self.minhot
-
-        #Get full path of root dir
-        root = self.nov_dir
-        #Create root dir if not already exists
-        if not myproviders.Tools.isdir(root):
-            myproviders.Tools.mkdir(root)
-        #root = myproviders.Tools.abspath(root)
-
-        #Get blogs ordered by post num
-        blogs = myproviders.DB.getTagBlogs(tag)
-        blogs = self.orderBlogs(blogs, order_by = '')
-
-        count = 1
-        txt = txt0 % (tagName, count, appName)
-        for blog in blogs:
-
-            #exclude blacklist users
-            if blog['blogNickName'] in self.blackusers:
-                continue
-
-            #All text posts on a blog
-            posts = myproviders.DB.getBlogPosts(blog)
-            posts = [p for p in posts \
-                    if p.type == 1 \
-                    and len(p.content) >= minlen \
-                    and tagName in p.tag \
-                    and self.checkHot(p, minhot) \
-                    and self.excludeBlack(p.title, self.blackwords) \
-                    and self.excludeBlack(p.tag, self.blacktags)]
-                
-
-            if len(posts)  == 0:
-                continue
-            posts = self.orderPosts(posts)
-            txt += myproviders.Tools.main(blog, posts, self.nov_dir) 
-            
-            if len(txt) / 1024 / 1024 >= 1:
-                # TODO add time to filename
-                fname = root + '/' + tagName + str(count) + '_raw.txt'
-                with open(fname, 'w', encoding = 'utf-8') as f:
-                    f.write(txt)
-                count += 1
-                txt = txt0 % (tagName, count, appName)
-                print('%d txt\'s made.' % count)
-         
-        if len(txt) < 50:
-            return None
-        fname = root + '/' + tagName + str(count) + '_raw.txt'
-        with open(fname, 'w', encoding = 'utf-8') as f:
-            f.write(txt)
-
-
-    def aozoraEpub3(self, delRaw = False):
-        tools = myproviders.Tools
-        root = self.nov_dir
-        if not tools.isdir(root):
-            print(root)
-            print('No aozora text found !')
-            return None
-        
-        print('Start converting aozora txt to epub ...')
-        #convert to epub
-        pjroot = myproviders.Tools.abspath('.')
-
-        #go to aozora convertor dir
-        #so root need to be a abs path now:
-        root = myproviders.Tools.abspath(root)
-        myproviders.Tools.cd(pjroot + '/' + \
-                            'AozoraEpub3')
-       
-        for fname in tools.ls(root):
-            if fname.endswith('txt'):
-                myproviders.Tools.to_epub(root + '/' + \
-                                      fname)
-                if delRaw:
-                    myproviders.Tools.rm(root + '/' + \
-                                        fname)
-                
-        # go back to pjroot
-        myproviders.Tools.cd(pjroot)
-        print('Epub ebooks done !' )
-
-
-    def makeMobi(self):
-        tools = myproviders.Tools
-        root = self.nov_dir
-        root = tools.abspath(root)
-        
-        if not tools.isdir(root):
-            print(root)
-            print('No aozora text found !')
-            return None
-        
-        print('Start converting eppub to mobi ...')
-        #convert to epub
-        pjroot = tools.abspath('.')
-        #go to aozora convertor dir
-        tools.cd(pjroot + '/' + 'AozoraEpub3')
-       
-        # convert
-        for fname in tools.ls(root):
-            if fname.endswith('epub'):
-                tools.to_mobi(root + '/' + fname)
-        # go back to pjroot
-        tools.cd(pjroot)
-        print('Mobi ebooks done !' )
-           
-
-    ###########
-    ###Utils###
-    ###########
-
-
-    def orderBlogs(self, blogs, order_by = 1):
-        # TODO add more cases
-        key = lambda e : len(myproviders.DB.getBlogPosts(e))
-        l = sorted(blogs, key = key, reverse = True)
-        return l
-
-
-    def orderPosts(self, posts):
-        # TODO add collection infos
-        collections = set([p['collectionId'] for p in posts])
-        s_posts = {i:[p for p in posts if p['collectionId'] == i] \
-                  for i in collections}
-        key = lambda e:e['publishTime']
-        l =[]
-        for col in s_posts:
-            l += sorted(s_posts[col], key = key)
-        return l
-
-
-    def excludeBlack(self, string, blacklist):
-        for b in blacklist:
-            if string and b in string:
-                return False
-        return True
-
-
-    def checkHot(self, post, mh):
-        hot = post.hot
-        hot = post.hot or 0
-        if hot >= mh:
-            return True
-        return False
-
-
 
 
 # A better spider
@@ -750,24 +486,8 @@ class LazyTagSpider:
         ## Basic infos about this tag-centered sprider
         self.tagName = tagName
         self.minhot = minhot
-        self.blackwords = set(config.blackwords + blackwords)
-        self.blacktags = set(config.blacktags + blacktags)
-        self.blackusers = set(config.blackusers +  blackusers)
         self.tag = None
 
-        ## Storing dir infos 
-        # Read the dir info's from global config
-        if not myproviders.Tools.isdir(config.data_export_dir):
-            myproviders.Tools.mkdir(config.data_export_dir)
-        # Seperate tag dir
-        self.tag_dir = config.data_export_dir  + '/'+ tagName
-        if not myproviders.Tools.isdir(self.tag_dir):
-            myproviders.Tools.mkdir(self.tag_dir)
-
-        #image and nov dir's under tag dir
-        self.img_dir = self.tag_dir + '/' + config.image_dir_name
-        self.nov_dir = self.tag_dir + '/' + config.nov_dir_name
-        #self.nov_images_dir = self.nov_dir + '/nov_images'
 
         ##Initialize database:
         myproviders.DB.init()
@@ -1102,13 +822,149 @@ class LazyTagSpider:
     #############################################################################################
 
 
+    #######################################DARK REGION###########################################
+
+
+    def updatePostsIp(self):
+        tag = self.getTag()
+        tag_searcher = myproviders.Searchers.web_tag_searcher()
+        tag_searcher.init(self.tagName)
+        print('>> Start updating posts ip')
+        
+        for posts in tag_searcher.doSearchGenerator():
+            posts = [p for p in posts if p['ip']]
+            print('%d posts with ip found, updating...' % len(posts))
+            #myproviders.DB.updatePostsIp(posts)
+
+
+
+
+class DBSpider:
+
+    def __init__(self, tagName, minhot = config.minhot, blackwords = [],\
+                blacktags = [], blackusers = []):
+
+        ## Basic infos about this tag-centered sprider
+        self.tagName = tagName
+        self.tag = myproviders.DB.syncOneTag(tagName = tagName)
+        self.minhot = minhot
+        self.blackwords = set(config.blackwords + blackwords)
+        self.blacktags = set(config.blacktags + blacktags)
+        self.blackusers = set(config.blackusers +  blackusers)
+
+        ## Storing dir infos 
+        # Read the dir info's from global config
+        if not myproviders.Tools.isdir(config.data_export_dir):
+            myproviders.Tools.mkdir(config.data_export_dir)
+        # Seperate tag dir
+        self.tag_dir = config.data_export_dir  + '/'+ tagName
+        if not myproviders.Tools.isdir(self.tag_dir):
+            myproviders.Tools.mkdir(self.tag_dir)
+
+        #image and nov dir's under tag dir
+        self.img_dir = self.tag_dir + '/' + config.image_dir_name
+        self.nov_dir = self.tag_dir + '/' + config.nov_dir_name
+        #self.nov_images_dir = self.nov_dir + '/nov_images'
+
+    
+
+
+    ###############
+    ###Epub&Mobi###
+    ###############
+
+
+    def dlPackedImages(self, minhot = 0):
+
+        thred = config.image_blog_limit
+        other = config.other_img_dir
+
+        print('Directly packing Images...')
+        tagName = self.tagName
+        #Sync a tag object from db
+        tag = self.tag
+
+        minhot = minhot or self.minhot
+        #Get full path of root dir
+        root = self.img_dir
+        root = myproviders.Tools.abspath(root)
+
+
+        #Initialize a downloader
+        image_downloader = myproviders.Searchers.img_downloader()
+
+        #Create root dir if not already exists
+        if not myproviders.Tools.isdir(root):
+            myproviders.Tools.mkdir(root)
+
+
+        #Loop against associated blogs 
+        for blog in myproviders.DB.getTagBlogs(tag):
+
+            if blog['blogNickName'] in self.blackusers:
+                continue
+
+            #Get all image posts under blog
+            posts = myproviders.DB.getBlogPosts(blog)
+            posts = self.filterPosts(posts)
+
+            #Get distict  dir path, create if not exists
+            user_name = blog.blogNickName
+            p_num = len(posts)
+
+            #Ignore pure text blog
+            if not p_num:
+                continue
+            
+            #Get folder name according to blog nick name
+            user_name = user_name.replace('/','_')
+            if p_num >= thred:
+                dir_path = root + '/' + user_name
+            else:
+                dir_path = root + '/' + others
+            if not myproviders.Tools.isdir(dir_path):
+                myproviders.Tools.mkdir(dir_path)
+
+            #Loop against image posts under blog
+            for post in posts:
+                
+                #Get post time in string
+                dt = myproviders.Tools.dt(post.publishTime)
+                
+                #Get image entries under this post
+                images = post.images
+                if not len(images):
+                    continue
+
+                #Start downloading 
+                for i in range(0, len(images)):
+                    #Do download
+                    old = image_downloader(dir_path, images[i])
+
+                    #Ignore invalid images
+                    if not old:
+                        continue
+ 
+                    #Get image extension
+                    ext = myproviders.Tools.extension(old)   
+
+                    #Name the image properly
+                    new = dir_path + '/%s-%s-%03d.%s'  % (user_name, dt, i+1, ext)
+                    try: 
+                        myproviders.Tools.rn(old, new)
+                    except FileNotFoundError as e:
+                        print(e,"\nImages not renamed properly!")
+
+            p_num and print("%d done!" % p_num)
+
+
     #TODO: unfinished
     def makeAozora(self, minhot = 0, minlen = 0):
         appName = config.app_name
 
         print('Start making Aozora text...')
         tagName = self.tagName
-        tag = self.getTag() 
+        tag = self.tag 
         txt0 = 'Lofter #%s #Archive%0d\n%s\n' 
         minhot = minhot or self.minhot
 
@@ -1140,7 +996,7 @@ class LazyTagSpider:
             posts = self.orderPosts(posts)
             txt += myproviders.Tools.main(blog, posts, self.nov_dir) 
             
-            if len(txt) / 1024 / 1024 >= 1:
+            if len(txt)*3 / 1024 / 1024 /2 >= config.max_epub_size:
                 # TODO add time to filename
                 fname = root + '/' + tagName + str(count) + '_raw.txt'
                 with open(fname, 'w', encoding = 'utf-8') as f:
@@ -1154,6 +1010,74 @@ class LazyTagSpider:
         fname = root + '/' + tagName + str(count) + '_raw.txt'
         with open(fname, 'w', encoding = 'utf-8') as f:
             f.write(txt)
+
+
+
+    def aozoraEpub3(self, delRaw = False):
+        tools = myproviders.Tools
+        root = self.nov_dir
+        if not tools.isdir(root):
+            print(root)
+            print('No aozora text found !')
+            return None
+        
+        print('Start converting aozora txt to epub ...')
+        #convert to epub
+        pjroot = myproviders.Tools.abspath('.')
+
+        #go to aozora convertor dir
+        #so root need to be a abs path now:
+        root = myproviders.Tools.abspath(root)
+        myproviders.Tools.cd(pjroot + '/' + \
+                            'AozoraEpub3')
+       
+        for fname in tools.ls(root):
+            if fname.endswith('txt'):
+                myproviders.Tools.to_epub(root + '/' + \
+                                      fname)
+                if delRaw:
+                    myproviders.Tools.rm(root + '/' + \
+                                        fname)
+                
+        # go back to pjroot
+        myproviders.Tools.cd(pjroot)
+        print('Epub ebooks done !' )
+
+
+
+    def makeMobi(self):
+        tools = myproviders.Tools
+        root = self.nov_dir
+        root = tools.abspath(root)
+        
+        if not tools.isdir(root):
+            print(root)
+            print('No aozora text found !')
+            return None
+        
+        print('Start converting eppub to mobi ...')
+        #convert to epub
+        pjroot = tools.abspath('.')
+        #go to aozora convertor dir
+        tools.cd(pjroot + '/' + 'AozoraEpub3')
+       
+        # convert
+        for fname in tools.ls(root):
+            if fname.endswith('epub'):
+                tools.to_mobi(root + '/' + fname)
+        # go back to pjroot
+        tools.cd(pjroot)
+        print('Mobi ebooks done !' )
+
+
+
+
+
+    ###########
+    ###PLAIN###
+    ###########
+           
+
 
 
 
@@ -1176,7 +1100,7 @@ class LazyTagSpider:
 
         # Iterate against blogs
         #NOTE: unfinished, Generator approach for being lazy
-        blogs  = myproviders.DB.getTagBlogs(self.getTag())
+        blogs  = myproviders.DB.getTagBlogs(self.tag)
         bcount = 0
         bleng = len(blogs)
         for blog in blogs:
@@ -1246,6 +1170,12 @@ class LazyTagSpider:
                 
 
 
+    ###########
+    ###Utils###
+    ###########
+
+
+
     def downloasImage(self, root, fname, image_url):
         downloader = myproviders.Searchers.url_img_downloader()
         path = downloader(root, image_url, fname = fname )
@@ -1265,22 +1195,11 @@ class LazyTagSpider:
 
 
 
-    def excludeBlack(self, string, blacklist):
-        for b in blacklist:
-            if string and b in string:
-                return False
-        return True
-
-
-
-    def checkHot(self, post, mh):
-        hot = post.hot
-        hot = post.hot or 0
-        if hot >= mh:
-            return True
-        return False
-
-
+    def orderBlogs(self, blogs, order_by = 1):
+        # TODO add more cases
+        key = lambda e : len(myproviders.DB.getBlogPosts(e))
+        l = sorted(blogs, key = key, reverse = True)
+        return l
 
 
     def orderPosts(self, posts):
@@ -1293,28 +1212,23 @@ class LazyTagSpider:
         for col in s_posts:
             l += sorted(s_posts[col], key = key)
         return l
-        
 
 
-    def orderBlogs(self, blogs, order_by = 1):
-        # TODO add more cases
-        key = lambda e : len(myproviders.DB.getBlogPosts(e))
-        l = sorted(blogs, key = key, reverse = True)
-        return l
+    def excludeBlack(self, string, blacklist):
+        for b in blacklist:
+            if string and b in string:
+                return False
+        return True
 
 
-    #######################################DARK REGION################################################
+    def checkHot(self, post, mh):
+        hot = post.hot
+        hot = post.hot or 0
+        if hot >= mh:
+            return True
+        return False
 
 
-    def updatePostsIp(self):
-        tag = self.getTag()
-        tag_searcher = myproviders.Searchers.web_tag_searcher()
-        tag_searcher.init(self.tagName)
-        print('>> Start updating posts ip')
-        
-        for posts in tag_searcher.doSearchGenerator():
-            posts = [p for p in posts if p['ip']]
-            print('%d posts with ip found, updating...' % len(posts))
-            #myproviders.DB.updatePostsIp(posts)
+
 
 
