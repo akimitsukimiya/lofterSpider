@@ -491,6 +491,7 @@ def updateCol(session, base_cls, key, key_val, col_key, col_val):
             .filter(getattr(base_cls, key) == key_val)\
             .update({col_key : col_val})
 
+
 def updateCols(session, base_cls, col_key, cols_json):
     prikey = base_cls.__mapper__.primary_key[0]
     prikeyname = prikey.name
