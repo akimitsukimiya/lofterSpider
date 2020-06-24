@@ -41,9 +41,9 @@ urllib3==1.25.9
 ```shell
 >> pip3 install sqlalchemy, html5lib, bs4, requests
 ```
-##### 修改配置文件
+#### 修改配置文件
 在`config.py`中设置数据库名称，前缀，导出黑名单和热度限制等。
-##### 运行
+#### 运行
 ```shell
 >> python3 run.py
 ```
