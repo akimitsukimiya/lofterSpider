@@ -38,7 +38,7 @@ urllib3==1.25.9
 ```
 #### 依赖解决：方法二
 ##### 手动安装
-```
+```shell
 >> pip3 install sqlalchemy, html5lib, bs4, requests
 ```
 ##### 修改配置文件
