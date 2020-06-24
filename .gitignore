@@ -4,5 +4,5 @@ lofter*.db
 archive/
 dist/
 build/
-.DS_Store/
+.DS*/
 __pycache__/

@@ -4,6 +4,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 
 
+
 class Patterns:
 
     center_of_page = "［＃ページの左右中央］"
@@ -77,6 +78,7 @@ class Patterns:
 
     image_ext = ['jpg','png','jpeg','gif','tiff',\
                 'JPG','PNG','JPEG','GIF','TIFF']
+
 
 
 def escapeAozora(text):
