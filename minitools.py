@@ -134,7 +134,7 @@ def fixFile(fname):
     f.close()
 
 
-def stripiImageUrl(url):
+def stripImageUrl(url):
     url = re.sub(r'(https?://[^\?]*)\?[^/]*',r'\1',url)
     return url
 
@@ -159,10 +159,11 @@ def cls():
 
 
 def fixWinPrint():
-    import io
     import sys
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer,encoding='utf-8')
-    sys.stdin = io.TextIOWrapper(sys.stdin.buffer,encoding='utf-8')
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stdin.reconfigure(encoding='utf-8')
+
+
 
 
 def findChinese(string):
@@ -175,6 +176,7 @@ def graphicLen(string):
     zn_len = len(findChinese(string))
     graphic_len = len(li) + zn_len  #Every Chinese char takes two space
     return graphic_len
+
 
 def stringFill(string, place_holder = ' ', center = False):
     # Get the width of current console

@@ -108,7 +108,7 @@ class Tools:
     make_links = aozoratext.makePlainLinks
     fix_fname = minitools.fixFname
 
-    img_url = minitools.stripiImageUrl
+    img_url = minitools.stripImageUrl
     main = aozoratext.posts2Aozora
     getImgs = aozoratext.htmlImages
     
