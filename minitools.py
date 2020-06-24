@@ -174,7 +174,7 @@ def findChinese(string):
 def graphicLen(string):
     li = list(string)
     zn_len = len(findChinese(string))
-    graphic_len = len(li) + zn_len  #Every Chinese char takes two space
+    graphic_len = len(li) + zn_len  #Every Chinese char takes two spaces
     return graphic_len
 
 
