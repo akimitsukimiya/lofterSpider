@@ -74,6 +74,8 @@ class DB:
                                     'tag')
     getLastestPost = providers.Callable(db.queryEntryList, session, db.Post,\
                                        'tag', order_by = db.Post.id, desc = True, limit = 1 )
+
+    updatePostsIp = providers.Callable(db.updateCols, session, db.Post, 'ip')
     
 
 

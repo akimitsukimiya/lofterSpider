@@ -123,7 +123,6 @@ class Comment(Base,SuperBase):
 
 
 
-
 class Image(Base,SuperBase):
     __tablename__ = 'images'
 
@@ -485,3 +484,18 @@ def exportJoinedCsv(session, base_cls, join_cls_list, cols, key, key_val, outfil
     for entry in query.all():
         out.writerow([getattr(entry, col.name) for col in cols])
     f.close()
+
+
+def updateCol(session, base_cls, key, key_val, col_key, col_val):
+    query = session.query(base_cls)\
+            .filter(getattr(base_cls, key) == key_val)\
+            .update({col_key : col_val})
+
+def updateCols(session, base_cls, col_key, cols_json):
+    prikey = base_cls.__mapper__.primary_key[0]
+    prikeyname = prikey.name
+   # privals = [cols_json[prikeyname] for r in cols_json]
+    for col in cols_json:
+        updateCol(session, base_cls, prikeyname, col[prikeyname],\
+                 col_key, col[col_key])
+

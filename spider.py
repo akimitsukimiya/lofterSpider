@@ -1301,3 +1301,20 @@ class LazyTagSpider:
         key = lambda e : len(myproviders.DB.getBlogPosts(e))
         l = sorted(blogs, key = key, reverse = True)
         return l
+
+
+    #######################################DARK REGION################################################
+
+
+    def updatePostsIp(self):
+        tag = self.getTag()
+        tag_searcher = myproviders.Searchers.web_tag_searcher()
+        tag_searcher.init(self.tagName)
+        print('>> Start updating posts ip')
+        
+        for posts in tag_searcher.doSearchGenerator():
+            posts = [p for p in posts if p['ip']]
+            print('%d posts with ip found, updating...' % len(posts))
+            myproviders.DB.updatePostsIp(posts)
+
+
