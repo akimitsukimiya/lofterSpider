@@ -4,19 +4,22 @@ import myproviders
 
 
 
+
+
 def main():
     myproviders.Tools.cls()
-    print(u'>> LOF SPIDER START SPIDERING !!>>>>>>>>>\n',
-        u'>> 版本 %s\n' % config.app_version,
-        u'>> 当前功能')
+    print(myproviders.Tools.string_fill(u'>> LOF SPIDER START SPIDERING ', u'>', True))
+    print(myproviders.Tools.string_fill(u'>> 完全备份老福特Tag档案·排版导出 ', u'>', True))
+    print(myproviders.Tools.string_fill(u'>> 版本 %s ' % config.app_version, u'>', True))
     options = (u'> 1. 将指定tag归档备份到本地数据库',
          u'> 2. 更新指定tag的本地数据库',
          u'> 3. 将数据库中的图片型博文筛选后导出',
          u'> 4. 将数据库中的文档型博文筛选后导出',
          u'> 5. 将数据库中的文档型博文筛选后制作成epub电子书')
     options = dict(zip(('1','2','3','4','5'), options))
-    print('\n'.join(options.values()))
-    print(u'>> 备注: 请在config.py中修改配置信息.')
+    #print('\n'.join(options.values()))
+    print(myproviders.Tools.string_fill(u'>> 备注: 请在config.py中修改配置信息.', r'>', True))
+    print(myproviders.Tools.string_fill(u'', r'>'))
     
     while True:
         tagName, option = userInput(options)
@@ -80,16 +83,17 @@ def userInput(options):
             break
         print(u'>> 重新选择...')
 
-    print(u'\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+    print(u'\n')
+    print(myproviders.Tools.string_fill(u'', r'>'))
     print(u'>> 当前工作tag: ', tagName)
     print(u'>> 已选功能：\n', options[option])
-    print(u'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+    print(myproviders.Tools.string_fill(u'', r'>'))
     certain = input(u'>> 按Enter开始，按其他键重新设置.')
     if certain == '':
         return tagName, option
     else: 
-        print(u'\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-        print(u'>> 重新设置.')
+        print(myproviders.Tools.string_fill(u'', r'>'))
+        print(myproviders.Tools.string_fill(u'>> 重新设置.', r'>'))
         return userInput(options)
 
 

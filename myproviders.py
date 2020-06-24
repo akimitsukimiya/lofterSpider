@@ -93,8 +93,9 @@ class Tools:
     rn = os.rename
     rm = os.remove
     dt = minitools.getTimeFromIntStamp
-    extension = minitools.getExtension
     cd = os.chdir 
+    string_fill = minitools.stringFill
+    extension = minitools.getExtension
     # TODO some config can be moved to global config file
     to_epub = providers.ListArgsCallable(subprocess.call, \
                                          ['java','-cp','AozoraEpub3.jar','AozoraEpub3',\
