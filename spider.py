@@ -526,8 +526,7 @@ class LazyTagSpider:
         else:
             earliest = 0
         #Initialize tag posts searcher
-        tag_posts_searcher.init(self.tagName, earliest = earliest,\
-                                timestamp = timestamp, offset = offset)
+        tag_posts_searcher.init(self.tagName, earliest = earliest)
 
         # Record id's of based blogs
         blogIds_based = []
@@ -538,11 +537,9 @@ class LazyTagSpider:
 
         #Use the generator doSearch method
         #to search posts from a tag
-        print(colors('red', '>>LAZY SPIDER>> '), \
+        print(colors('red', '>> LAZY SPIDER >> '), \
               "Start tag searching !")
         count = 0
-        plen = 0
-        blen = 0
         for posts in tag_posts_searcher.doSearchGenerator():
 
             count += 1
@@ -561,9 +558,7 @@ class LazyTagSpider:
                 continue
 
             ## Base blogs ( or ignore based )
-            bcount, pcount = self.baseBlogs(blogs, rebase_level)
-            plen += pcount
-            blen += bcount
+            self.baseBlogs(blogs, rebase_level)
             if rebase_level is DO:
                 print(colors('red', '>> Syncing raw posts to db!'))
                 images_raw = self.getPostsImages(posts)
@@ -581,8 +576,11 @@ class LazyTagSpider:
                       "Resume tag searching!")
 
 
-        info = colors('red', '>> LAZY BASING DONE !\n>> Based blogs: %10d\n>> Based posts: %10d'\
-                      % (blen,plen))
+        info = colors('red', \
+                      '>> LAZY BASING DONE >> \n>> Based blogs: %10d\n>> Based posts: %10d'\
+                      % (myproviders.DB.countTagBlogs(tag),\
+                        myproviders.DB.countTagPosts(tag) \
+                        ))
         print(info)
 
 
@@ -632,7 +630,7 @@ class LazyTagSpider:
         ##Base image posts
         imgposts_raw = [post for post in posts_raw if post['type'] == 2]
         
-        info = colors('pink', ">> %d new image posts to base." % len(imgposts_raw))
+        info = colors('pink', ">> %d new image posts to sync." % len(imgposts_raw))
         print(info)
         images = []
 

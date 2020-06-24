@@ -159,16 +159,13 @@ def initDb():
 ## TODO: how to get back connections when all are lost ?
 
 def resetSession():
+    global se
     se.close()
     se = Session()
 
 ## a somewhat refreshing method for a session
 def setSessionEngine(e):
     session.bind = e
-
-def aNewSession():
-    se = Session() 
-    return se
 
 
 ## change to another db #####
@@ -204,13 +201,14 @@ def getse():
 ## create and attach to a existing session, ie.sync to db##
 def getEntryFromJson(base_cls, json_object):
     keys = list(json_object.keys())
-    base_dict = base_cls.__dict__
-    
+    cols =[col.name for col in \
+           base_cls.__mapper__.columns]
+
     for k in keys:
         k_cls = json_object[k] and json_object[k].__class__
-        if k not in base_dict:
+        if k not in cols:
             del json_object[k]
-        elif k_cls not in [str, int]:
+        elif k_cls not in [str, int, bool]:
             del json_object[k]
 
     return base_cls(**json_object)
@@ -222,12 +220,13 @@ syntax entry = syncOneJson(session, base_class, key_for_primary_id, **json_objec
 '''
 def syncOneJson(session, base_cls, id_key, **json_object):
     u_entry = getEntryFromJson(base_cls, json_object)
-    entry = (session.query(base_cls)
-         .filter(getattr(base_cls, id_key) == json_object[id_key])
-         .first())
-    
+    entry = session.query(base_cls)\
+         .filter(getattr(base_cls, id_key) == json_object[id_key])\
+         .first()
+    cols =[col.name for col in \
+           base_cls.__mapper__.columns]
     if entry:
-        for k in u_entry.cols():
+        for k in cols:
             u_entry[k] and setattr(entry, k, u_entry[k])
     else:
         entry = u_entry
@@ -271,7 +270,8 @@ def syncJsonList(session, base_cls, id_key, json_list):
 
 
 
-# Use this instead of the upper methos to sync a json object to db
+# Use this instead of the upper method to sync 
+# a json object list to db
 # If it is certain that those records are not yet recorded
 def syncUncheckedJsonList(session, base_cls,  json_list):
     #entry_list = [syncOneUncheckedJson(session, base_cls, **i) for i in json_list]
@@ -327,23 +327,27 @@ def forceListUpdate(session, base_cls, update_list):
             print(e)
             session.rollback()
 
-
+#NOTE: may consume too much memory!
 def extendAssociatedList(session, root_entry, entry_list, list_key, id_key):
     #list_stored = getattr(root_entry, list_key)
-    list_stored = getAssociatedList(root_entry, list_key)
-    key_list_stored = [i[id_key] for i in list_stored]  
-    list_update = [i for i in entry_list if i[id_key] not in key_list_stored]
-    #print( '!!!!!!',list_update)
-    if not list_update:
-        return None
-    base_cls = entry_list[0].__class__
-    forceListUpdate(session, base_cls, list_update)
+    #list_stored = getAssociatedList(root_entry, list_key)
+    #key_list_stored = [i[id_key] for i in list_stored]  
+    #list_update = [i for i in entry_list \
+    #               if i[id_key] not in key_list_stored]
+    #if not list_update:
+    #    return None
+    #base_cls = entry_list[0].__class__
+    #forceListUpdate(session, base_cls, list_update)
     try:
-        getattr(root_entry, list_key).extend(list_update)
+        getattr(root_entry, list_key).extend(entry_list)
         session.commit()
     except Exception as e:
         print('DB ERROR:', e)
         session.rollback()
+
+
+#def associateMany(session, asc_tbl, one, many):
+
 
 
 # If it is certain that those records are already synced but not yet associated
@@ -499,4 +503,10 @@ def updateCols(session, base_cls, col_key, cols_json):
     for col in cols_json:
         updateCol(session, base_cls, prikeyname, col[prikeyname],\
                  col_key, col[col_key])
+
+
+def countM2MChildren(session, child_cls, child_col, parent):
+    query = session.query(child_cls)\
+            .with_parent(parent, child_col)
+    return query.count() 
 

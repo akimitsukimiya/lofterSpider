@@ -229,10 +229,6 @@ class LofterWebTagSearcher(Searcher):
 
 
     def decorateSession(self):
-        if not hasattr(self, '__isDecorated__'):
-            self.__isDecorated__ = False
-        if self.__isDecorated__:
-            return None
         headers =  {
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
 		'Content-Type':'text.plain',
@@ -244,7 +240,6 @@ class LofterWebTagSearcher(Searcher):
                 'Origin': 'http://www.lofter.com'
                 }
         self.se.headers.update(headers)
-        self.__isDecorated__ = True
         return None
 
 
@@ -444,8 +439,8 @@ class LofterBlogTagSearcher(Searcher):
             # Total fetched
             self.__raw_fetched__ = len(rst_p)
             # Valid fetched
-            rst_p = [one['post'] for one in rst_p if rst_p and \
-                     one and \
+            rst_p = [one['post'] for one in rst_p \
+                     if rst_p and one and \
                      self.tag_name in genparse.fixTags(one['post']['tagList']) \
                      and one['post']['publishTime'] >= int(self.__earliest__)]
             self.__fetched__ += len(rst_p)

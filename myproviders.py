@@ -20,8 +20,8 @@ class Searchers:
     se = providers.Singleton(requests.Session)
     wse = providers.Singleton(requests.Session)
     tag_searcher = providers.Singleton(websearcher.LofterTagSearcher, se)
-    web_tag_searcher = providers.Singleton(websearcher.LofterWebTagSearcher, se)
-    blog_searcher = providers.Singleton(websearcher.LofterBlogTagSearcher, wse)
+    web_tag_searcher = providers.Singleton(websearcher.LofterWebTagSearcher, wse)
+    blog_searcher = providers.Singleton(websearcher.LofterBlogTagSearcher, se)
     ref_blog_searcher = providers.Singleton(websearcher.LofterRefBlogSearcher, se)
     blog_info_getter = providers.Singleton(websearcher.LofterBlogInfoGetter, se)
     blog_on_tag_searcher = providers.Singleton(websearcher.LofterBlogOnTagSearcher, se)
@@ -77,7 +77,10 @@ class DB:
                                        'tag', order_by = db.Post.id, desc = True, limit = 1 )
 
     #updatePostsIp = providers.Callable(db.updateCols, session, db.Post, 'ip')
-    
+    countTagPosts = providers.Callable(db.countM2MChildren, session, \
+                                     db.Post, 'posts') 
+    countTagBlogs = providers.Callable(db.countM2MChildren, session, \
+                                     db.Blog, 'blogs')
 
 
 class Tools:
