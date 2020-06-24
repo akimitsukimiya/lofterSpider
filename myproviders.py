@@ -62,6 +62,7 @@ class DB:
     getPostImages = providers.Callable(db.getAssociatedList,child_key = 'images')
     getTagBlogs = providers.Callable(db.getAssociatedList, child_key = 'blogs') 
     getBlogPosts = providers.Callable(db.getAssociatedList, child_key = 'posts') 
+    getPostTags = providers.Callable(db.getAssociatedList, child_key = 'tags') 
     delete = providers.Callable(db.delEntryList, session)
     findBlogsByNickName = providers.Callable(db.queryEntryList, session, db.Blog, 'blogNickName')
 

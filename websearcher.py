@@ -443,10 +443,10 @@ class LofterBlogTagSearcher(Searcher):
             rst_p = rst.json()['response']['posts']
             # Total fetched
             self.__raw_fetched__ = len(rst_p)
-            
             # Valid fetched
             rst_p = [one['post'] for one in rst_p if rst_p and \
-                     one and  self.tag_name in one['post']['tagList'] \
+                     one and \
+                     self.tag_name in genparse.fixTags(one['post']['tagList']) \
                      and one['post']['publishTime'] >= int(self.__earliest__)]
             self.__fetched__ += len(rst_p)
 
@@ -458,6 +458,7 @@ class LofterBlogTagSearcher(Searcher):
             self.__raw_fetched__ = -1
             return []
         return rst_p
+
 
 
     def isContinue(self, rst):

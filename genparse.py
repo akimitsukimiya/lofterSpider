@@ -36,8 +36,8 @@ def parseDwrString(dwr_string):
 
     #null to None, false to False, true to True
     string = re.sub(r'null', r'None', string)
-    string = re.sub(r'false', r'False', string)
-    string = re.sub(r'true', r'True', string)
+    string = re.sub(r'=false\n', r'=False\n', string)
+    string = re.sub(r'=true\n', r'=True\n', string)
     
     #Name the returned list
     string = re.sub(r'\ndwr[^\[]*(\[[^\]]*\]).*', r'\nresp=\1', string)
@@ -65,6 +65,12 @@ def parseDwrString(dwr_string):
     exec(string, ns)
     
     return ns['resp']
+
+
+def fixTags(tagList):
+    tags = [tag.replace(u'\xa0', r' ') \
+            for tag in tagList]
+    return tags
 
 
 

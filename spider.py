@@ -546,6 +546,7 @@ class LazyTagSpider:
         for posts in tag_posts_searcher.doSearchGenerator():
 
             count += 1
+
             
             # Get blogs from posts
             blogs = {p['blogId']:p['blogInfo'] for p in posts if p}\
@@ -563,6 +564,14 @@ class LazyTagSpider:
             bcount, pcount = self.baseBlogs(blogs, rebase_level)
             plen += pcount
             blen += bcount
+            if rebase_level is DO:
+                print(colors('red', '>> Syncing raw posts to db!'))
+                images_raw = self.getPostsImages(posts)
+                posts = myproviders.DB.syncPosts(posts)
+                images = myproviders.DB.syncImages(images_raw)
+                myproviders.DB.addPostsToTag(tag, posts)
+
+
 
 
             # Record based blogs
@@ -570,13 +579,15 @@ class LazyTagSpider:
 
             print(colors('red', '>> LAZY SPIDER >> '), \
                       "Resume tag searching!")
+
+
         info = colors('red', '>> LAZY BASING DONE !\n>> Based blogs: %10d\n>> Based posts: %10d'\
                       % (blen,plen))
         print(info)
 
 
     ##> Base all posts published by a specific blog, orm-object required 
-    def baseBlogPosts(self, blog, rebase_level = DO_NOT):
+    def getBlogPosts(self, blog, rebase_level = DO_NOT):
         tagName = self.tagName
         
         # Initialize a blog searcher
@@ -611,21 +622,34 @@ class LazyTagSpider:
             info=colors('pink', '>> Blog %s already fully based!' % blog['blogNickName'])
             print(info)
          
-        yield 'posts_raw', posts_raw
+        images_raw = self.getPostsImages(posts_raw)
+        return posts_raw, images_raw
+
+
+
+    def getPostsImages(self, posts_raw):
         
         ##Base image posts
         imgposts_raw = [post for post in posts_raw if post['type'] == 2]
         
         info = colors('pink', ">> %d new image posts to base." % len(imgposts_raw))
         print(info)
+        images = []
 
         for imgp_r in imgposts_raw:
 
             #image_links json
             image_links = imgp_r['photoLinks']
             try:
-                image_links = myproviders.Tools.json_to_string(image_links)
-            except:
+                if image_links.__class__ is str:
+                    image_links = image_links.replace("'",'"')
+                    image_links = myproviders.Tools.json_to_string(image_links)
+                elif image_links.__class__ is list:
+                    pass
+                else:
+                    raise Exception('Can\'t parse image links!')
+            except Exception as e:
+                print(e)
                 info = colors('pink', 'xx Ignore one image post for it contains invalid links')
                 print(info)
                 continue
@@ -642,14 +666,10 @@ class LazyTagSpider:
                 imgcount += 1
                 image_link['id'] = imgp_r['id'] * 1000 + imgcount
                 image_link['postId'] = imgp_r['id']
+            images += image_links
 
-            yield 'images_raw',image_links
-        
+        return images 
 
-        info = colors('pink',\
-                      ">> %d posts added from blog %s in total." \
-                      % (len(posts_raw), blog['blogNickName'] or '')) 
-        print(info)
 
 
     ##> Base all blogs provided by raw json blog list
@@ -672,13 +692,7 @@ class LazyTagSpider:
         images_raw = []
         for blog in blogs:
 
-            #Search for blog posts one at a time
-            for yname,yval in self.baseBlogPosts(blog, rebase_level):
-                if yname == 'posts_raw':
-                    posts_raw += yval
-                if yname == 'images_raw':
-                    images_raw += yval
-
+            posts_raw, images_raw =  self.getBlogPosts(blog, rebase_level)
 
             bcount += 1
             info = colors('green',\
@@ -1118,8 +1132,14 @@ class DBSpider:
             if not posts:
                 continue
 
-            author_dir = main_dir + '/' + \
-                    myproviders.Tools.fix_fname(blog['blogNickName'])
+            if ptype is IMAGE and  config.image_blog_limit \
+               and len(posts) < config.image_blog_limit:
+                author_dir = main_dir + '/' + \
+                        config.other_img_dir
+            else:
+                author_dir = main_dir + '/' + \
+                        myproviders.Tools.fix_fname(blog['blogNickName'])
+
             if not myproviders.Tools.isdir(author_dir):
                 myproviders.Tools.mkdir(author_dir)
 
@@ -1185,7 +1205,7 @@ class DBSpider:
 
     def filterPosts(self, posts, ptype = 0):
         posts = [p for p in posts \
-                if self.tagName in p['tag'] \
+                if self.tag in myproviders.DB.getPostTags(p) \
                 and (not ptype or p['type'] is ptype)
                 and self.checkHot(p, self.minhot) \
                 and self.excludeBlack(p['title'], self.blackwords) \

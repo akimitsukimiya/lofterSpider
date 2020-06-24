@@ -169,6 +169,7 @@ def htmlToAozora(html, images, root):
 
 
             ultra = html[2] and tag[html[2]]
+            ultra = re.sub('\?.*','', ultra).replace('\n', '')
             strg = txt + rare + ultra
             strg = re.sub(simple, aozora, strg)
             tag.replace_with(strg)
