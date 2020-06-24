@@ -1315,6 +1315,6 @@ class LazyTagSpider:
         for posts in tag_searcher.doSearchGenerator():
             posts = [p for p in posts if p['ip']]
             print('%d posts with ip found, updating...' % len(posts))
-            myproviders.DB.updatePostsIp(posts)
+            #myproviders.DB.updatePostsIp(posts)
 
 
