@@ -968,6 +968,8 @@ class LazyTagSpider:
         if not posts_raw:
             return len(blogs),0
 
+        
+
         #Sync new found posts to db
         print(colors('blue', '>> Syncing %d posts to db...' % len(posts_raw)))
         posts = myproviders.DB.syncNewPosts(posts_raw)
