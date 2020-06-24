@@ -5,8 +5,10 @@
 2. 将数据库中的内容导出成txt并下载相关图。
 
 ### 使用方法
-##### 版本要求
+#### 版本要求
 python3.7
+java >8
+#### 依赖解决：方法一
 ##### 设置虚拟环境
 ```shell
 >> pip3 install virtualenv
@@ -33,6 +35,11 @@ requests==2.24.0
 SQLAlchemy==1.3.17
 urllib3==1.25.9
 ...
+```
+#### 依赖解决：方法二
+##### 手动安装
+```
+>> pip3 install sqlalchemy, html5lib, bs4, requests
 ```
 ##### 修改配置文件
 在`config.py`中设置数据库名称，前缀，导出黑名单和热度限制等。
