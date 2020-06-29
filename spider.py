@@ -484,7 +484,7 @@ class LazyTagSpider:
                 blacktags = [], blackusers = []):
 
         ## Basic infos about this tag-centered sprider
-        self.tagName = tagName
+        self.tagName = tagName.lower()
         self.minhot = minhot
         self.tag = None
 
@@ -505,9 +505,9 @@ class LazyTagSpider:
 
     def getLastestPublishTimeInDb(self):
 
-        latest = myproviders.DB.getLastestPost(self.tagName)
+        latest = myproviders.DB.getLastestPost(self.getTag())
         if latest:
-            latest = latest[0]['publishTime']
+            latest = latest['publishTime']
         else:
             latest = 0
         return latest

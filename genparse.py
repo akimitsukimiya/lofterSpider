@@ -68,7 +68,7 @@ def parseDwrString(dwr_string):
 
 
 def fixTags(tagList):
-    tags = [tag.replace(u'\xa0', r' ') \
+    tags = [tag.replace(u'\xa0', r' ').lower() \
             for tag in tagList]
     return tags
 

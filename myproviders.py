@@ -73,8 +73,10 @@ class DB:
                                   db.Post.__mapper__.columns + \
                                   [db.Blog.blogNickName, db.Blog.blogName, db.Blog.homePageUrl],\
                                     'tag')
-    getLastestPost = providers.Callable(db.queryEntryList, session, db.Post,\
-                                       'tag', order_by = db.Post.id, desc = True, limit = 1 )
+    getLastestPost = providers.Callable(db.getFirstM2MChild, session, \
+                                       db.Post, 'posts', \
+                                       order_key = db.Post.publishTime,\
+                                       desc = True)
 
     #updatePostsIp = providers.Callable(db.updateCols, session, db.Post, 'ip')
     countTagPosts = providers.Callable(db.countM2MChildren, session, \

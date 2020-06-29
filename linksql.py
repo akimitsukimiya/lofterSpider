@@ -510,3 +510,14 @@ def countM2MChildren(session, child_cls, child_col, parent):
             .with_parent(parent, child_col)
     return query.count() 
 
+
+def getFirstM2MChild(session, child_cls, child_col, parent,\
+                    order_key = '', desc = False):
+    query = session.query(child_cls)\
+            .with_parent(parent, child_col)
+    if order_key and desc:
+        query = query.order_by(order_key.desc())
+    elif order_key:
+        query = query.order_by(order_key)
+
+    return query.first() 
