@@ -12,7 +12,7 @@ set shortmess=aoO
 argglobal
 %argdel
 $argadd linksql.py
-edit linksql.py
+edit spider.py
 set splitbelow splitright
 set nosplitbelow
 set nosplitright
@@ -30,18 +30,47 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 1 - ((0 * winheight(0) + 15) / 30)
+32
+normal! zo
+34
+normal! zo
+36
+normal! zo
+64
+normal! zo
+70
+normal! zo
+87
+normal! zo
+123
+normal! zo
+162
+normal! zo
+231
+normal! zo
+241
+normal! zo
+269
+normal! zo
+285
+normal! zo
+378
+normal! zo
+415
+normal! zo
+32
+normal! zc
+let s:l = 32 - ((31 * winheight(0) + 16) / 32)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 0
+32
+normal! 01|
 tabnext 1
-badd +1 linksql.py
-badd +1 sqlbase.py
 badd +134 spider.py
 badd +50 myproviders.py
 badd +174 linkdb.py
+badd +46 sqlbase.py
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
@@ -53,7 +82,6 @@ if file_readable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
-nohlsearch
 let g:this_session = v:this_session
 let g:this_obsession = v:this_session
 doautoall SessionLoadPost

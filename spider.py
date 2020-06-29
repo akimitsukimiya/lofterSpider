@@ -690,7 +690,9 @@ class LazyTagSpider:
         images_raw = []
         for blog in blogs:
 
-            posts_raw, images_raw =  self.getBlogPosts(blog, rebase_level)
+            p_r, i_r =  self.getBlogPosts(blog, rebase_level)
+            posts_raw += p_r
+            images_raw += i_r
 
             bcount += 1
             info = colors('green',\
