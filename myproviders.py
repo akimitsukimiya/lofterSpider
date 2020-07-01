@@ -99,6 +99,7 @@ class Tools:
     rn = os.rename
     rm = os.remove
     dt = minitools.getTimeFromIntStamp
+    timestamp = minitools.getTimestamp
     cd = os.chdir 
     string_fill = minitools.stringFill
     extension = minitools.getExtension

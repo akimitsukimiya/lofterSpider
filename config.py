@@ -74,3 +74,6 @@ minhot = 0
 
 # How large you want to restrict your epub size
 max_epub_size = 3
+
+# The earlist timestamp you want to export
+earliest_exported = '2020-06-01 12:00'

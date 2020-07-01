@@ -865,6 +865,8 @@ class DBSpider:
         self.blackwords = set(config.blackwords + blackwords)
         self.blacktags = set(config.blacktags + blacktags)
         self.blackusers = set(config.blackusers +  blackusers)
+        self.earliest_exported = myproviders.Tools.timestamp(config.earliest_exported,\
+                                                             '%Y-%m-%d %H:%M')
 
         ## Storing dir infos 
         # Read the dir info's from global config
@@ -1205,12 +1207,14 @@ class DBSpider:
 
     def filterPosts(self, posts, ptype = 0):
         posts = [p for p in posts \
-                if self.tag in myproviders.DB.getPostTags(p) \
-                and (not ptype or p['type'] is ptype)
+                if self.tagName in p.tag \
+                and (not ptype or p['type'] is ptype) \
+                and self.earliest_exported <= p['publishTime'] \
                 and self.checkHot(p, self.minhot) \
                 and self.excludeBlack(p['title'], self.blackwords) \
                 and self.excludeBlack(p['tag'], self.blacktags)
                 ]
+        #print(len(posts))
         return posts
 
 

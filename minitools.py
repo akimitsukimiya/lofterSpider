@@ -2,7 +2,7 @@ import inspect
 from datetime import datetime
 import re
 import os
-import shutil
+import shutil  
 
 
 
@@ -67,6 +67,16 @@ def getTimeFromIntStamp(ts):
     dt = datetime.fromtimestamp(ts)
     dt = dt.strftime('%Y-%m-%d')
     return dt
+
+
+
+def getTimestamp(strtime, fmt):
+    t = datetime.strptime(strtime, fmt)
+    t = t.timestamp()*1000
+    t = round(t)
+    return t
+
+    
                 
                 
 def getExtension(string):
