@@ -82,9 +82,9 @@ class Searcher(ABC):
             one_rst = self.parseResult(one_rst_r)
             data = self.getRequestData(one_rst_r)
             #result += one_rst
+            yield one_rst
             if not self.isContinue(one_rst_r):
                 break
-            yield one_rst
         self.onSearchDone()
 
 
